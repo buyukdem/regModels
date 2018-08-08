@@ -1,0 +1,89 @@
+---
+title: "RegMods Assignment"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Summary
+Manual transmission better for MPG (miles per gallon) than automatic transmission. We did a multivariate regression to improve estimate of transmission types on MPG.
+
+## Data Processing
+
+```{r cars}
+data(mtcars)
+
+mtcars$cyl <- as.factor(mtcars$cyl)
+mtcars$vs <- as.factor(mtcars$vs)
+mtcars$gear <- factor(mtcars$gear)
+mtcars$carb <- factor(mtcars$carb)
+mtcars$am <- factor(mtcars$am,labels=c('Automatic','Manual'))
+str(mtcars)
+```
+
+## EDA
+
+Do a boxplot to examine car transmission types on mpg. We can say there is increase in mpg for manual transmission vs automatic transmission. Also, plot histogram to check for normal curve.
+
+```{r eda}
+par(mfrow = c(1, 2))
+# Histogram with Normal Curve
+x <- mtcars$mpg
+h <- hist(x, breaks=10, col="salmon", xlab="Miles Per Gallon",
+        main="Histogram of Miles per Gallon")
+
+boxplot(mpg~am, data = mtcars,
+        col = c("light blue", "light pink"),
+        xlab = "Transmission",
+        ylab = "Miles per Gallon",
+        main = "MPG by Transmission Type")
+```
+
+## Hypotheses Testing
+
+Seems that mean MPG of manual transmission cars is 7.24 MPGs higher than that of automatic transmission cars. We need to check whether this is a significant difference. Set alpha-value at 0.5 and run a t-test to find out.
+
+```{r hypo test}
+autoData <- mtcars[mtcars$am == "Automatic",]
+manualData <- mtcars[mtcars$am == "Manual",]
+t.test(autoData$mpg, manualData$mpg)
+```
+
+## Regression Analysis
+
+```{r pairs}
+pairs(mtcars)
+
+data(mtcars)
+sort(cor(mtcars)[1,])
+```
+
+Based on pairwise correlation of variables with mpg, we see that there is little linear correlation between mpg and the variables qsec, gear, and carb.
+
+## Model building and selection
+
+Model1 explains variation less (adjusted R Square: 0.3385) compared to Model2 (adjusted R Square: 0.8066). However, Model1's am variable give lower p-value (less than 0.05) whereas no variable in the model2 gives lower p-value than 0.05 (due to overfitting). Therefore, we use the step method to iterate over the variables and obtain the best model.
+
+```{r models}
+model1 <- lm(mpg~am, data = mtcars)
+summary(model1)
+
+model2 <- lm(mpg~., data = mtcars)
+summary(model2)
+
+best <- step(model2, direction = "both", trace = FALSE)
+summary(best)
+```
+
+## Residual diagnostics
+
+Residual are normally distributed and homoskedastic. So, we can report the estimates from our report.
+
+```{r residuals}
+par(mfrow = c(2,2))
+plot(best)
+```
