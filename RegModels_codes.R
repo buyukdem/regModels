@@ -23,7 +23,7 @@ boxplot(mpg~am, data = mtcars,
 # Hypotheses testing
 autoData <- mtcars[mtcars$am == "Automatic",]
 manualData <- mtcars[mtcars$am == "Manual",]
-t.test(autoData$mpg, manualData$mpg)
+t.test(autoData$mpg, manualData$mpg) 
 
 # variable selection, checking
 pairs(mtcars)
